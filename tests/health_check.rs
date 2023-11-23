@@ -4,7 +4,7 @@
 // It also spares you from having to specify the `#[test]` attribute
 
 static TRACING: Once = Once::new();
-use std::{default, net::TcpListener, sync::Once};
+use std::{net::TcpListener, sync::Once};
 
 use email_newsletter::{
     configuration::{get_configuration, DatabaseSettings},
@@ -13,7 +13,6 @@ use email_newsletter::{
 };
 use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use tracing::subscriber;
 
 pub struct TestApp {
     pub address: String,
@@ -101,10 +100,9 @@ async fn spawn_app() -> TestApp {
     TRACING.call_once(|| {
         let default_filter_level = "info".to_string();
         let subscriber_name = "test".to_string();
-        if (std::env::var("TEST_LOG").is_ok()) {
+        if std::env::var("TEST_LOG").is_ok() {
             let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
             init_subscriber(subscriber);
-            init_subscriber(subscriber)
         } else {
             let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
             init_subscriber(subscriber);
